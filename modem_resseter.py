@@ -1,41 +1,37 @@
-import subprocess
-import time
-from datetime import datetime
-import ctypes
 import sys
+import ctypes
+import tkinter as tk
 
-# Проверка, запущен ли скрипт с правами Администратора Windows
+# Проверка на права админа
 if not ctypes.windll.shell32.IsUserAnAdmin():
-    print("==========================================================")
-    print("КРИТИЧЕСКАЯ ОШИБКА: Нет прав Администратора!")
-    print("Программа управления модемом требует повышенных привилегий.")
-    print("Пожалуйста, перезапусти VS Codium или консоль от Администратора.")
-    print("==========================================================")
-    input("\nНажми Enter для выхода...")
+    ctypes.windll.user32.MessageBoxW(0, "Запустите программу от имени Администратора!", "Критическая ошибка", 0x10 | 0x0)
     sys.exit()
 
-# ID модема из диспетчера устройств (win x - Диспетчер устройство - Сетевые Адаптеры)
-DEVICE_ID = r"USB\VID_0BDA&PID_B82C&MI_02\7&9CF2C2F&0&0002"
-# Интервал перезапуска в секундах
-DELAY_SECONDS = 300
+# Создание главного окна программы
+window = tk.Tk()
+window.title("Modem Resetter") # Заголовок окна
+window.geometry("600x600")     # Базовый размер окна (ширина x высота)
 
-print("=== Скрипт автоматического перезапуска USB-модема запущен ===")
+# Добавление текстовой надписи
+label_title = tk.Label(
+    window, 
+    text="Автоматический перезапуск модема", 
+    font=("Arial", 14, "bold"),
+    fg="#2c3e50" # Цвет текста
+)
+label_title.pack(pady=20) # Надпись разместится сверху, с отступом 20 пикселей вниз
 
-while True:
-    current_time = datetime.now().strftime("%H:%M:%S") # Для указания времени на каждую итерацю (перезапуск модема)
-    print(f"[{current_time}] Аппаратный перезапуск USB-модема...")
-    
-    # Запускаем команду pnputil через командную строку Windows
-    try:
-        result = subprocess.run(
-            ["pnputil", "/restart-device", DEVICE_ID], 
-            capture_output=True, 
-            text=True, 
-            check=True
-        )
-        print(f"[{current_time}] Перезапуск завершен успешно.")
-    except subprocess.CalledProcessError as e:     # Вывод ошибки в случае сбоя
-        print(f"[{current_time}] Ошибка при перезапуске: {e.stderr}")
-    
-    print(f"Ожидание {DELAY_SECONDS // 60} минут...\n")
-    time.sleep(DELAY_SECONDS) # Таймер 
+# Добавление интерактивной кнопки
+btn_start = tk.Button(
+    window, 
+    text="Запустить мониторинг", 
+    font=("Arial", 11),
+    bg="#2ecc71", # Зеленый цвет кнопки
+    fg="white",   # Белый текст
+    width=25,
+    height=5
+)
+btn_start.pack(pady=10) # Укладываем кнопку сразу под надписью
+
+# Главный цикл, который не даёт окну закрыться
+window.mainloop()
